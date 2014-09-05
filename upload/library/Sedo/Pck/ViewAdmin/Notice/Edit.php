@@ -1,15 +1,19 @@
 <?php
 
-class Sedo_Pck_ViewAdmin_Page_Edit extends XFCP_Sedo_Pck_ViewAdmin_Page_Edit
+class Sedo_Pck_ViewAdmin_Notice_Edit extends XFCP_Sedo_Pck_ViewAdmin_Notice_Edit
 {
 	public function renderHtml()
 	{
-		parent::renderHtml();
+
+		if(class_exists('XenForo_ViewAdmin_Notice_Edit') && method_exists('XenForo_ViewAdmin_Notice_Edit', 'renderHtml'))
+		{
+			parent::renderHtml();
+		}
 
 		if(XenForo_Application::get('options')->get('sedo_pck_default_editor'))
 		{
-			$editorName = 'template';
-			$html = $this->_params['template']['template'];
+			$editorName = 'message';
+			$html = $this->_params['notice']['message'];
 		
 			$this->_params['editorTemplate'] = XenForo_ViewPublic_Helper_Editor::getEditorTemplate(
 				$this, $editorName, $html

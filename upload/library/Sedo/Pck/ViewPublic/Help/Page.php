@@ -1,11 +1,11 @@
 <?php
-class Sedo_Pck_ViewPublic_Page_View extends XFCP_Sedo_Pck_ViewPublic_Page_View
+class Sedo_Pck_ViewPublic_Help_Page extends XFCP_Sedo_Pck_ViewPublic_Help_Page
 {
 	public function renderHtml()
 	{
 		parent::renderHtml();
 
-		if(XenForo_Application::get('options')->get('sedo_pck_parse_bbcode'))
+		if(XenForo_Application::get('options')->get('sedo_pck_parse_bbcode_help_page'))
 		{
 			$formatterOptions = array(
 				'view' => $this,

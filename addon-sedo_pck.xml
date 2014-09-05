@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="sedo_pck" title="CK Editor in XenForo Pages" version_string="1.2.1" version_id="3" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="sedo_pck" title="CK Editor in XenForo Pages" version_string="1.3.0" version_id="4" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
   <admin_templates>
     <template title="sedo_pck_configuration"><![CDATA[<xen:require css="sedo_pck_configuration.css" />
+<xen:set var="$sedoEdName">{xen:if '{$sedoCkName}', '{$sedoCkName}', 'template'}</xen:set>
+<xen:set var="$sedoEdValue">{xen:if '{$sedoCkValue}', '{xen:raw $sedoCkValue}', '{$template.template}'}</xen:set>
+<xen:set var="$sedoEdLabel">{xen:if '{$sedoCkLabel}', '{$sedoCkLabel}', '{xen:phrase template_html}:'}</xen:set>
 
 <xen:if is="{$xenOptions.sedo_pck_default_editor}">
-	<div class="editor_container">
-		{xen:raw $editorTemplate}
-	</div>
+	<dl class="ctrlUnit {xen:if '!{$sedoCkNotFull}', 'ckeditor'}">
+		<dt><label for="ctrl_title">{$sedoEdLabel}</label></dt>
+		<dd>
+			<div class="editor_container">
+				{xen:raw $editorTemplate}
+			</div>
+		</dd>
+	</dl>
 <xen:else/>
-	<xen:textboxunit class="ckeditor" name="template" value="{$template.template}" label="{xen:phrase template_html}:" rows="2" inputclass="Elastic OptOut" />
+	<xen:textboxunit class="{xen:if '!{$sedoCkNotFull}', 'ckeditor'}" name="{$sedoEdName}" value="{xen:raw $sedoEdValue}" label="{$sedoEdLabel}" rows="2" inputclass="Elastic OptOut" />
 
 	<xen:comment>
 		This template must be inserted AFTER the textarea
@@ -22,9 +30,17 @@
 	<xen:require js="js/sedo/pck/ckeditor/ckeditor.js" />
 </xen:if>
 
+<xen:if is="{$sedoCkHint}">
+	<p class="hint CkEditorMod">{xen:raw $sedoCkHint}</p>
+</xen:if>
+
+<xen:if is="{$sedoCkExplain}">
+	<p class="explain CkEditorMod">{xen:raw $sedoCkExplain}</p>
+</xen:if>
+
 <script>
 	<xen:if is="!{$xenOptions.sedo_pck_default_editor}">
-		CKEDITOR.replace( 'template', {
+		CKEDITOR.replace( 'ctrl_{$sedoEdName}', {
 			uiColor: '#A5CAE4'
 		});
 	</xen:if>		
@@ -34,15 +50,19 @@
 	{	
 		XenForo.sedo_pck = function($element)
 		{
-			$('input[type="submit"]').bind('click', function(e) {
+			var $form = $element.closest('form'),
+				$submit = $form.find('input[type="submit"]'),
+				$hint = $form.find('.CkEditorMod.hint'),
+				$explain = $form.find('.CkEditorMod.explain');
+			
+			$submit.on('click', function(e) {
 				var content = false,
-					$form = $element.closest('form'),
 					ed = XenForo.getEditorInForm($form);
 
 				if(typeof ed.syncCode !== 'undefined') {
 					content = ed.getCode();
 				}else if(typeof CKEDITOR !== 'undefined'){
-					content = CKEDITOR.instances.ctrl_template.getData();
+					content = CKEDITOR.instances.ctrl_{$sedoEdName}.getData();
 				}else if(window.tinyMCE && typeof ed.execCommand !== 'undefined'){
 					content = tinymce.activeEditor.getContent();
 				}else if(typeof ed.execCommand === 'undefined'){
@@ -53,9 +73,19 @@
 					$element.val(content);
 				}
 			});
+
+			if($hint.length){
+				var hint = $hint.text();
+				$element.parents('dl').children('dt').append('<dfn>'+hint+'</dfn>');
+				$hint.remove();
+			}
+
+			if($explain.length){
+				$element.parents('dl').children('dd').append($explain);
+			}
 		};
 		
-		 XenForo.register('textarea[name="template"]', 'XenForo.sedo_pck');
+		 XenForo.register('textarea[name="{$sedoEdName}"]', 'XenForo.sedo_pck');
 	}
 	(jQuery, this, document);
 </script>]]></template>
@@ -64,9 +94,11 @@
 	text-align: left !important;
 }
 
-dl.ckeditor dt label{
+dl.ckeditor dt label,
+dl.ckeditor dt dfn{
 	margin-left:0 !important;
 }
+
 
 dl.ckeditor dd{
 	width:100% !important;
@@ -92,11 +124,37 @@ dl.ckeditor dd{
       <find><![CDATA[#<xen:textboxunit[^>]+?name="template"[^>]+?>#]]></find>
       <replace><![CDATA[<xen:include template="sedo_pck_configuration" />]]></replace>
     </modification>
+    <modification template="help_page_edit" modification_key="sedo_pck_integration_help" description="CKEditor for XenForo Help pages" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<xen:textboxunit[^>]+?name="content"[^>]*?label="([^">]+?)"[^>]+?hint="([^"]*?)"[^>]*>.+?(<xen:explain>(.*?)</xen:explain>).+?</xen:textboxunit>#si]]></find>
+      <replace><![CDATA[<xen:include template="sedo_pck_configuration">
+		<xen:set var="$sedoCkName">content</xen:set>
+		<xen:set var="$sedoCkValue">{$template.template}</xen:set>
+		<xen:set var="$sedoCkNotFull">1</xen:set>
+		<xen:set var="$sedoCkLabel">$1</xen:set>
+		<xen:set var="$sedoCkHint">$2</xen:set>
+		<xen:set var="$sedoCkExplain">$4</xen:set>
+	</xen:include>]]></replace>
+    </modification>
+    <modification template="notice_edit" modification_key="sedo_pck_integration_notice" description="CKEditor for XenForo Notices" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<xen:textboxunit[^>]+label="([^">]+)"[^>]+name="message"[^>]*>.+?(<xen:hint>(.*?)</xen:hint>).+?(<xen:explain>(.*?)</xen:explain>).+?</xen:textboxunit>#is]]></find>
+      <replace><![CDATA[<xen:include template="sedo_pck_configuration">
+				<xen:set var="$sedoCkName">message</xen:set>
+				<xen:set var="$sedoCkValue">{$notice.message}</xen:set>
+				<xen:set var="$sedoCkNotFull">1</xen:set>
+				<xen:set var="$sedoCkLabel">$1</xen:set>
+				<xen:set var="$sedoCkHint">$3</xen:set>
+				<xen:set var="$sedoCkExplain">$5</xen:set>
+			</xen:include>]]></replace>
+    </modification>
   </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
+    <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewAdminNotice" active="1" hint="XenForo_ViewAdmin_Notice_Edit" description="Load html editor in notice"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewAdminHelpPageEdit" active="1" hint="XenForo_ViewAdmin_HelpPage_Edit" description="Redactor for XenForo Help pages"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewPublicHelpPage" active="1" hint="XenForo_ViewPublic_Help_Page" description="Allow Bb Codes in Help pages"/>
     <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewPublicPageView" active="1" hint="XenForo_ViewPublic_Page_View" description="Extend View"/>
     <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewAdminPageEdit" active="1" hint="XenForo_ViewAdmin_Page_Edit" description="Extend ViewAdmin Page Edit"/>
+    <listener event_id="notices_prepare" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="noticesPrepare" active="1" hint="" description="Allow Bb Codes in notice"/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
@@ -107,13 +165,25 @@ dl.ckeditor dd{
       <default_value>0</default_value>
       <edit_format_params></edit_format_params>
       <sub_options></sub_options>
-      <relation group_id="sedo_pck" display_order="20"/>
+      <relation group_id="sedo_pck" display_order="1"/>
     </option>
     <option option_id="sedo_pck_parse_bbcode" edit_format="onoff" data_type="boolean" can_backup="1">
       <default_value>0</default_value>
       <edit_format_params></edit_format_params>
       <sub_options></sub_options>
-      <relation group_id="sedo_pck" display_order="1"/>
+      <relation group_id="sedo_pck" display_order="100"/>
+    </option>
+    <option option_id="sedo_pck_parse_bbcode_help_page" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="sedo_pck" display_order="130"/>
+    </option>
+    <option option_id="sedo_pck_parse_bbcode_notice" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="sedo_pck" display_order="110"/>
     </option>
   </optiongroups>
   <permissions>
@@ -128,10 +198,15 @@ dl.ckeditor dd{
     <phrase title="option_sedo_pck_default_editor_explain" version_id="1" version_string="1.1"><![CDATA[]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode" version_id="0" version_string="1.0"><![CDATA[Parse Bb Codes in pages ?]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode_explain" version_id="0" version_string="1.0"><![CDATA[]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode_help_page" version_id="3" version_string="1.2.1"><![CDATA[Parse Bb Codes in help pages?]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode_help_page_explain" version_id="3" version_string="1.2.1"><![CDATA[]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode_notice" version_id="3" version_string="1.2.1"><![CDATA[Parse Bb Codes in notices?]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode_notice_explain" version_id="3" version_string="1.2.1"><![CDATA[]]></phrase>
   </phrases>
   <route_prefixes/>
   <style_properties/>
   <templates/>
   <public_template_modifications/>
   <bb_code_media_sites/>
+  <bb_codes/>
 </addon>
