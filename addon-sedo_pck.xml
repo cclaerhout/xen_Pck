@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="sedo_pck" title="CK Editor in XenForo Pages" version_string="1.3.0" version_id="4" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="sedo_pck" title="CK Editor in XenForo Back office" version_string="1.3.0" version_id="4" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -10,6 +10,36 @@
 <xen:set var="$sedoEdLabel">{xen:if '{$sedoCkLabel}', '{$sedoCkLabel}', '{xen:phrase template_html}:'}</xen:set>
 
 <xen:if is="{$xenOptions.sedo_pck_default_editor}">
+<script>
+if (typeof RedactorPlugins === 'undefined') var RedactorPlugins = {};
+
+!function($, window, document, undefined)
+{
+	$(document).on('EditorInit', function(e, data){
+		var editor = data.editor,
+			config = data.config;
+
+		RedactorPlugins.pckHtml = {
+			init: function()
+			{
+				var plugin = this,
+					htmlMode = 'html_mode';
+					
+				if(plugin.$el.hasClass(htmlMode)){
+					plugin.$editor.addClass(htmlMode);
+				}
+			}
+		};
+
+		if(typeof config.plugins === undefined || !$.isArray(config.plugins)){
+			config.plugins = ['pckHtml'];
+		}else{
+			config.plugins.push('pckHtml');
+		}
+	});
+}(jQuery, this, document, 'undefined');
+</script>
+
 	<dl class="ctrlUnit {xen:if '!{$sedoCkNotFull}', 'ckeditor'}">
 		<dt><label for="ctrl_title">{$sedoEdLabel}</label></dt>
 		<dd>
@@ -146,6 +176,10 @@ dl.ckeditor dd{
 				<xen:set var="$sedoCkExplain">$5</xen:set>
 			</xen:include>]]></replace>
     </modification>
+    <modification template="editor" modification_key="sedo_pck_missing_extra_class" description="Add missing extra class options" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#class="textCtrl MessageEditor[^"]*(?<!{\$editorOptions\.extraClass})(?=")#i]]></find>
+      <replace><![CDATA[$0 {$editorOptions.extraClass}]]></replace>
+    </modification>
   </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
@@ -192,8 +226,8 @@ dl.ckeditor dd{
     <interface_groups/>
   </permissions>
   <phrases>
-    <phrase title="option_group_sedo_pck" version_id="0" version_string="1.0"><![CDATA[CK Editor in XenForo Pages]]></phrase>
-    <phrase title="option_group_sedo_pck_description" version_id="0" version_string="1.0"><![CDATA[]]></phrase>
+    <phrase title="option_group_sedo_pck" version_id="4" version_string="1.3.0"><![CDATA[CK Editor in XenForo Back office]]></phrase>
+    <phrase title="option_group_sedo_pck_description" version_id="4" version_string="1.3.0"><![CDATA[Integration of CK Editor (or Redactor) in: XenForo pages (applications), Help pages & Notices.]]></phrase>
     <phrase title="option_sedo_pck_default_editor" version_id="1" version_string="1.1"><![CDATA[Use default editor?]]></phrase>
     <phrase title="option_sedo_pck_default_editor_explain" version_id="1" version_string="1.1"><![CDATA[]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode" version_id="0" version_string="1.0"><![CDATA[Parse Bb Codes in pages ?]]></phrase>
@@ -206,7 +240,14 @@ dl.ckeditor dd{
   <route_prefixes/>
   <style_properties/>
   <templates/>
-  <public_template_modifications/>
+  <public_template_modifications>
+    <modification template="editor_contents.css" modification_key="sedo_pck_redactor_html" description="Html mode for redactor" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#^.*$#si]]></find>
+      <replace><![CDATA[$0
+body.html_mode p:first-child, body.html_mode div:first-child { margin: 0px 0px 1em 0px; }
+body.html_mode p,body.html_mode div { margin: 1em 0px; }]]></replace>
+    </modification>
+  </public_template_modifications>
   <bb_code_media_sites/>
   <bb_codes/>
 </addon>

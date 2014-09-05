@@ -13,9 +13,12 @@ class Sedo_Pck_ViewAdmin_HelpPage_Edit extends XFCP_Sedo_Pck_ViewAdmin_HelpPage_
 		{
 			$editorName = 'content';
 			$html = $this->_params['template']['template'];
+			$editorOptions = array(
+				'extraClass' => 'html_mode'
+			);			
 		
 			$this->_params['editorTemplate'] = XenForo_ViewPublic_Helper_Editor::getEditorTemplate(
-				$this, $editorName, $html
+				$this, $editorName, $html, $editorOptions
 			);
 
 			/*The getEditorTemplate doesn't have an option to bypass the Wysiwyg formatter, let's trick it*/
