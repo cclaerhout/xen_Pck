@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="sedo_pck" title="CK Editor in XenForo Pages" version_string="1.2.1" version_id="3" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="sedo_pck_configuration"><![CDATA[<xen:require css="sedo_pck_configuration.css" />
+
+<xen:if is="{$xenOptions.sedo_pck_default_editor}">
+	<div class="editor_container">
+		{xen:raw $editorTemplate}
+	</div>
+<xen:else/>
+	<xen:textboxunit class="ckeditor" name="template" value="{$template.template}" label="{xen:phrase template_html}:" rows="2" inputclass="Elastic OptOut" />
+
+	<xen:comment>
+		This template must be inserted AFTER the textarea
+		The XenForo "require js" tag will first load the main CKE JS in the header
+		The embedded JS must stay there
+	</xen:comment>
+	
+	<xen:require js="js/sedo/pck/ckeditor/ckeditor.js" />
+</xen:if>
+
+<script>
+	<xen:if is="!{$xenOptions.sedo_pck_default_editor}">
+		CKEDITOR.replace( 'template', {
+			uiColor: '#A5CAE4'
+		});
+	</xen:if>		
+
+	<xen:comment>The below code is to copy the frame content to the textarea content</xen:comment>
+	!function($, window, document, _undefined)
+	{	
+		XenForo.sedo_pck = function($element)
+		{
+			$('input[type="submit"]').bind('click', function(e) {
+				var content = false,
+					$form = $element.closest('form'),
+					ed = XenForo.getEditorInForm($form);
+
+				if(typeof ed.syncCode !== 'undefined') {
+					content = ed.getCode();
+				}else if(typeof CKEDITOR !== 'undefined'){
+					content = CKEDITOR.instances.ctrl_template.getData();
+				}else if(window.tinyMCE && typeof ed.execCommand !== 'undefined'){
+					content = tinymce.activeEditor.getContent();
+				}else if(typeof ed.execCommand === 'undefined'){
+					content = ed.val();
+				}
+				
+				if(content){
+					$element.val(content);
+				}
+			});
+		};
+		
+		 XenForo.register('textarea[name="template"]', 'XenForo.sedo_pck');
+	}
+	(jQuery, this, document);
+</script>]]></template>
+    <template title="sedo_pck_configuration.css"><![CDATA[dl.ckeditor dt{
+	width:100% !important;
+	text-align: left !important;
+}
+
+dl.ckeditor dt label{
+	margin-left:0 !important;
+}
+
+dl.ckeditor dd{
+	width:100% !important;
+}
+
+.editor_container{
+	margin-top: 15px;
+}
+
+#ctrl_template,
+.bbCodeEditorContainer textarea{
+	width: 100%;
+}
+
+.redactor_btn_container_switchmode{
+	display:none;
+}
+
+]]></template>
+  </admin_templates>
+  <admin_template_modifications>
+    <modification template="page_edit" modification_key="sedo_pck_integration" description="CKEditor for XenForo Pages" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<xen:textboxunit[^>]+?name="template"[^>]+?>#]]></find>
+      <replace><![CDATA[<xen:include template="sedo_pck_configuration" />]]></replace>
+    </modification>
+  </admin_template_modifications>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewPublicPageView" active="1" hint="XenForo_ViewPublic_Page_View" description="Extend View"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewAdminPageEdit" active="1" hint="XenForo_ViewAdmin_Page_Edit" description="Extend ViewAdmin Page Edit"/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="sedo_pck" display_order="9999" debug_only="0"/>
+    <option option_id="sedo_pck_default_editor" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="sedo_pck" display_order="20"/>
+    </option>
+    <option option_id="sedo_pck_parse_bbcode" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="sedo_pck" display_order="1"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="option_group_sedo_pck" version_id="0" version_string="1.0"><![CDATA[CK Editor in XenForo Pages]]></phrase>
+    <phrase title="option_group_sedo_pck_description" version_id="0" version_string="1.0"><![CDATA[]]></phrase>
+    <phrase title="option_sedo_pck_default_editor" version_id="1" version_string="1.1"><![CDATA[Use default editor?]]></phrase>
+    <phrase title="option_sedo_pck_default_editor_explain" version_id="1" version_string="1.1"><![CDATA[]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode" version_id="0" version_string="1.0"><![CDATA[Parse Bb Codes in pages ?]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode_explain" version_id="0" version_string="1.0"><![CDATA[]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates/>
+  <public_template_modifications/>
+  <bb_code_media_sites/>
+</addon>
