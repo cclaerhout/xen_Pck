@@ -1,6 +1,24 @@
 <?php
 class Sedo_Pck_Listener
 {
+	protected static $_view;
+
+	public static function controllerPreView(XenForo_FrontController $fc, 
+		XenForo_ControllerResponse_Abstract &$controllerResponse,
+		XenForo_ViewRenderer_Abstract &$viewRenderer,
+		array &$containerParams
+	)
+	{
+		if(!($viewRenderer instanceof XenForo_ViewRenderer_Json)
+			&& XenForo_Application::get('options')->get('sedo_pck_parse_bbcode_notice')
+			&& XenForo_Application::get('options')->get('sedo_pck_notices_create_view')
+		)
+		{
+			$response = $fc->getResponse();
+			self::$_view = new XenForo_ViewPublic_Base($viewRenderer, $response, $containerParams);
+		}
+	}
+
 	public static function extendViewPublicPageView($class, array &$extend)
 	{
 		if($class == 'XenForo_ViewPublic_Page_View')
@@ -25,6 +43,7 @@ class Sedo_Pck_Listener
 		}
 
 		$formatterOptions = array(
+			'view' => self::$_view,
 			'smilies' => array()
 		);
 		
