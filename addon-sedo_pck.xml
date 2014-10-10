@@ -51,7 +51,7 @@ if (typeof RedactorPlugins === 'undefined') var RedactorPlugins = {};
 		</dd>
 	</dl>
 <xen:else/>
-	<xen:textboxunit class="{xen:if '!{$sedoCkNotFull}', 'ckeditor'}" name="{$sedoEdName}" value="{xen:raw $sedoEdValue}" label="{$sedoEdLabel}" rows="2" inputclass="Elastic OptOut" />
+	<xen:textboxunit class="{xen:if '!{$sedoCkNotFull}', 'ckeditor'}" name="{$sedoEdName}" value="{xen:raw $sedoEdValue}" label="{xen:raw $sedoEdLabel}" rows="2" inputclass="Elastic OptOut" />
 	<xen:comment>
 		This template must be inserted AFTER the textarea
 		The XenForo "require js" tag will first load the main CKE JS in the header
