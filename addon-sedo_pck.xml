@@ -196,6 +196,12 @@ dl.ckeditor dd{
   <email_template_modifications/>
   <optiongroups>
     <group group_id="sedo_pck" display_order="9999" debug_only="0"/>
+    <option option_id="sedo_pck_basecss" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="sedo_pck" display_order="300"/>
+    </option>
     <option option_id="sedo_pck_default_editor" edit_format="onoff" data_type="boolean" can_backup="1">
       <default_value>0</default_value>
       <edit_format_params></edit_format_params>
@@ -235,6 +241,14 @@ dl.ckeditor dd{
   <phrases>
     <phrase title="option_group_sedo_pck" version_id="4" version_string="1.3.0"><![CDATA[CK Editor in XenForo Back office]]></phrase>
     <phrase title="option_group_sedo_pck_description" version_id="4" version_string="1.3.0"><![CDATA[Integration of CK Editor (or Redactor) in: XenForo pages (applications), Help pages & Notices.]]></phrase>
+    <phrase title="option_sedo_pck_basecss" version_id="6" version_string="1.3.2"><![CDATA[Automatically enable browser default css for html content]]></phrase>
+    <phrase title="option_sedo_pck_basecss_explain" version_id="6" version_string="1.3.2"><![CDATA[XenForo is using a reset Css, which means some of html tags will not rendered as the browser would have done by default. To overcome this, the default css values must be restored, which can be performed by the Yahoo YUI Base css.<br />
+<br />
+If you enable this option, the html output will be automatically wrapped inside a tag that will make the default base css apply to any nested elements.<br />
+<br />
+If you don't enable this option (which might be better if you use some Bb Codes), you can still enable this base css by manually wrapping some part of the code between the following tag: &lt;div class="pke_base"&gt;html content&lt;/div&gt;<br />
+<br />
+If you need to modify this base css, just edit the template "pke_base.css"]]></phrase>
     <phrase title="option_sedo_pck_default_editor" version_id="1" version_string="1.1"><![CDATA[Use default editor?]]></phrase>
     <phrase title="option_sedo_pck_default_editor_explain" version_id="1" version_string="1.1"><![CDATA[]]></phrase>
     <phrase title="option_sedo_pck_notices_create_view" version_id="4" version_string="1.3.0"><![CDATA[Bb Codes Template support for Notices]]></phrase>
