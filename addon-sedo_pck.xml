@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="sedo_pck" title="CK Editor in XenForo Back office" version_string="1.3.1" version_id="5" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="sedo_pck" title="CK Editor in XenForo Back office" version_string="1.3.2" version_id="6" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -248,8 +248,75 @@ dl.ckeditor dd{
   </phrases>
   <route_prefixes/>
   <style_properties/>
-  <templates/>
+  <templates>
+    <template title="pke_base.css" version_id="5" version_string="1.3.1"><![CDATA[/*
+YUI 3.18.0 (build 790466e)
+Copyright 2014 Yahoo! Inc. All rights reserved.
+Licensed under the BSD License.
+http://yuilibrary.com/license/
+*/
+
+.pke_base h1 {
+	font-size:138.5%;
+}
+.pke_base h2 {
+	font-size:123.1%;
+}
+.pke_base h3 {
+	font-size:108%;
+}
+.pke_base h1, .pke_base h2, .pke_base h3 {
+	margin:1em 0;
+}
+.pke_base h1, .pke_base h2, .pke_base h3, .pke_base h4, .pke_base h5, .pke_base h6, .pke_base strong {
+	font-weight:bold;
+}
+.pke_base abbr, .pke_base acronym {
+	border-bottom:1px dotted #000;
+	cursor:help;
+}
+.pke_base em {
+	font-style:italic;
+}
+.pke_base blockquote, .pke_base ul, .pke_base ol, .pke_base dl {
+	margin:1em;
+}
+.pke_base ol, .pke_base ul, .pke_base dl {
+	margin-left:2em;
+}
+.pke_base ol {
+	list-style: decimal outside;
+}
+.pke_base ul {
+	list-style: disc outside;
+}
+.pke_base dd {
+	margin-left:1em;
+}
+.pke_base th, .pke_base td {
+	border:1px solid #000;
+	padding:.5em;
+}
+.pke_base th {
+	font-weight:bold;
+	text-align:center;
+}
+.pke_base caption {
+	margin-bottom:.5em;
+	text-align:center;
+}
+.pke_base p, .pke_base fieldset, .pke_base table, .pke_base pre {
+	margin-bottom:1em;
+}
+
+.pke_base input[type=text], .pke_base input[type=password], .pke_base textarea{width:12.25em;*width:11.9em;}]]></template>
+  </templates>
   <public_template_modifications>
+    <modification template="EXTRA.css" modification_key="pke_extra" description="Pke extra css" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[/^.*$/s]]></find>
+      <replace><![CDATA[$0
+<xen:include template="pke_base.css" />]]></replace>
+    </modification>
     <modification template="editor_contents.css" modification_key="sedo_pck_redactor_html" description="Html mode for redactor" execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#^.*$#si]]></find>
       <replace><![CDATA[$0

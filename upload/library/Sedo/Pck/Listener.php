@@ -37,17 +37,18 @@ class Sedo_Pck_Listener
 
 	public static function noticesPrepare(array &$noticeList, array &$noticeTokens, XenForo_Template_Abstract $template, array $containerData)
 	{
-		if(!XenForo_Application::get('options')->get('sedo_pck_parse_bbcode_notice'))
-		{
-			return;
-		}
+		$bbCodeMode = false;
 
-		$formatterOptions = array(
-			'view' => self::$_view,
-			'smilies' => array()
-		);
+		if(XenForo_Application::get('options')->get('sedo_pck_parse_bbcode_notice'))
+		{
+			$formatterOptions = array(
+				'view' => self::$_view,
+				'smilies' => array()
+			);
 		
-		$bbCodeParser = XenForo_BbCode_Parser::create(XenForo_BbCode_Formatter_Base::create('Base', $formatterOptions));
+			$bbCodeParser = XenForo_BbCode_Parser::create(XenForo_BbCode_Formatter_Base::create('Base', $formatterOptions));
+			$bbCodeMode = true;
+		}
 		
 		foreach ($noticeList AS $noticeId => &$notice)
 		{
@@ -57,9 +58,17 @@ class Sedo_Pck_Listener
 			}
 			
 			$message = &$notice['message'];
-			$message = $bbCodeParser->render($message);
-			$message = htmlspecialchars_decode($message);
-			$message = str_replace("</p><br />\n<br />", "</p>", $message);			
+			
+			if($bbCodeMode)
+			{
+				$message = Sedo_Pck_Helper::BbCodeOutputBefore($message);
+				$message = $bbCodeParser->render($message);
+				$message= Sedo_Pck_Helper::BbCodeOutputAfter($message);
+								
+				$message = htmlspecialchars_decode($message);
+			}
+
+			$message = Sedo_Pck_Helper::finalOutput($message, $bbCodeMode);			
 		}
 	}
 
