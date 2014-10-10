@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="sedo_pck" title="CK Editor in XenForo Back office" version_string="1.3.2" version_id="6" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="sedo_pck" title="CK Editor in XenForo Back office" version_string="1.4.0" version_id="7" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -8,8 +8,10 @@
 <xen:set var="$sedoEdName">{xen:if '{$sedoCkName}', '{$sedoCkName}', 'template'}</xen:set>
 <xen:set var="$sedoEdValue">{xen:if '{$sedoCkValue}', '{xen:raw $sedoCkValue}', '{$template.template}'}</xen:set>
 <xen:set var="$sedoEdLabel">{xen:if '{$sedoCkLabel}', '{$sedoCkLabel}', '{xen:phrase template_html}:'}</xen:set>
+<xen:set var="$sedoEdAutoLoad">{xen:if '{$sedoCkAutoLoad} == "no"', 0, 1}</xen:set>
+<xen:set var="$sedoEdToggleValue">{$sedoCkToggleValue}</xen:set>
 
-<xen:if is="{$xenOptions.sedo_pck_default_editor}">
+<xen:if is="{$xenOptions.sedo_pck_default_editor} AND {$sedoEdAutoLoad}">
 <script>
 if (typeof RedactorPlugins === 'undefined') var RedactorPlugins = {};
 
@@ -50,7 +52,6 @@ if (typeof RedactorPlugins === 'undefined') var RedactorPlugins = {};
 	</dl>
 <xen:else/>
 	<xen:textboxunit class="{xen:if '!{$sedoCkNotFull}', 'ckeditor'}" name="{$sedoEdName}" value="{xen:raw $sedoEdValue}" label="{$sedoEdLabel}" rows="2" inputclass="Elastic OptOut" />
-
 	<xen:comment>
 		This template must be inserted AFTER the textarea
 		The XenForo "require js" tag will first load the main CKE JS in the header
@@ -69,11 +70,76 @@ if (typeof RedactorPlugins === 'undefined') var RedactorPlugins = {};
 </xen:if>
 
 <script>
-	<xen:if is="!{$xenOptions.sedo_pck_default_editor}">
-		CKEDITOR.replace( 'ctrl_{$sedoEdName}', {
-			uiColor: '#A5CAE4'
-		});
-	</xen:if>		
+	var $textarea = $('textarea[name="{$sedoEdName}"]');
+	
+	<xen:if is="!{$xenOptions.sedo_pck_default_editor} OR !{$sedoEdAutoLoad}">
+
+		<xen:if is="!{$sedoEdAutoLoad}">
+			$('{$sedoCkToggleSource}').change(function() {
+				if($(this).val() == '{$sedoCkToggleValue}'){
+					var content = $textarea.val();
+					if(content){
+						content = content
+							.replace(/&/g, "&amp;")
+							.replace(/</g, "&lt;")
+							.replace(/>/g, "&gt;")
+							.replace(/"/g, "&quot;")
+							.replace(/'/g, "&#039;");
+
+						content = content
+							.replace(/\t/g, '	')
+							.replace(/^([\S].*)/gm, '<p>$1</p>');
+					}
+					
+					$textarea.val(content);
+					$('#pck_strip').remove();
+					
+					CKEDITOR.replace( 'ctrl_{$sedoEdName}', {
+						uiColor: '#A5CAE4'
+					});
+				}else{
+					if(CKEDITOR && typeof CKEDITOR.instances.ctrl_{$sedoEdName} !== 'undefined')
+					{
+						CKEDITOR.instances.ctrl_{$sedoEdName}.destroy();
+						
+						var $stripHtml = $('<p id="pck_strip">{xen:escape {xen:phrase pck_strip_html_tags}}</p>').click(function(){
+							var content = $textarea.val();
+
+							content = content
+								.replace(/&amp;/g, "&")
+								.replace(/&lt;/g, "<")
+								.replace(/&gt;/g, ">")
+								.replace(/&quot;/g, '"')
+								.replace(/&#039;/g, "'");
+								
+							content = content
+								.replace(/	/g, '\t')
+								.replace(/&nbsp;/g, '  ')
+								.replace(/<\/p>\n<p>/g, '\n');
+				
+							var regex_p = new RegExp("^<p>([\\s\\S]+)</p>$", "i");
+							if(regex_p.test(content))
+							{
+								content = content.match(regex_p);
+								content = content[1];
+							}
+		
+							content = $.trim(content.replace(/<[^>]+>/ig,''));
+							
+							$textarea.val(content);
+							$(this).remove();
+						});
+						
+						$stripHtml.insertAfter($textarea);
+					}
+				}
+			});
+		<xen:else />
+			CKEDITOR.replace( 'ctrl_{$sedoEdName}', {
+				uiColor: '#A5CAE4'
+			});
+		</xen:if>
+	</xen:if>
 
 	<xen:comment>The below code is to copy the frame content to the textarea content</xen:comment>
 	!function($, window, document, _undefined)
@@ -147,9 +213,26 @@ dl.ckeditor dd{
 	display:none;
 }
 
-]]></template>
+#pck_strip{
+	font-size: 9pt;
+	cursor: pointer;
+	color: orange;
+}]]></template>
   </admin_templates>
   <admin_template_modifications>
+    <modification template="user_email" modification_key="ck_integration_user_email" description="CKEditor for XenForo User Email" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<xen:textboxunit[^>]+?label="(?P<label>[^">]+?)"[^>]+?name="email_body"[^>]*?>.+?(<xen:explain>(?P<explain>.*?)</xen:explain>).+?</xen:textboxunit>#si]]></find>
+      <replace><![CDATA[<xen:include template="sedo_pck_configuration">
+		<xen:set var="$sedoCkName">email_body</xen:set>
+		<xen:set var="$sedoCkValue"></xen:set>
+		<xen:set var="$sedoCkNotFull">1</xen:set>
+		<xen:set var="$sedoCkLabel">$1</xen:set>
+		<xen:set var="$sedoCkExplain">$3</xen:set>
+		<xen:set var="$sedoCkAutoLoad">no</xen:set>
+		<xen:set var="$sedoCkToggleSource">#ctrl_email_format_html, #ctrl_email_format_text</xen:set>
+		<xen:set var="$sedoCkToggleValue">html</xen:set>
+	</xen:include>]]></replace>
+    </modification>
     <modification template="page_edit" modification_key="sedo_pck_integration" description="CKEditor for XenForo Pages" execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#<xen:textboxunit[^>]+?name="template"[^>]+?>#]]></find>
       <replace><![CDATA[<xen:include template="sedo_pck_configuration" />]]></replace>
@@ -259,6 +342,7 @@ If you need to modify this base css, just edit the template "pke_base.css"]]></p
     <phrase title="option_sedo_pck_parse_bbcode_help_page_explain" version_id="3" version_string="1.2.1"><![CDATA[]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode_notice" version_id="3" version_string="1.2.1"><![CDATA[Parse Bb Codes in notices?]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode_notice_explain" version_id="3" version_string="1.2.1"><![CDATA[]]></phrase>
+    <phrase title="pck_strip_html_tags" version_id="6" version_string="1.3.2"><![CDATA[Strip html tags]]></phrase>
   </phrases>
   <route_prefixes/>
   <style_properties/>
