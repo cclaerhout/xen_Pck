@@ -35,6 +35,14 @@ class Sedo_Pck_Listener
 		}	
 	}
 
+	public static function extendViewPublicAccountUpgrades($class, array &$extend)
+	{
+		if($class == 'XenForo_ViewPublic_Account_Upgrades')
+		{
+			$extend[] = 'Sedo_Pck_ViewPublic_Account_Upgrades';
+		}	
+	}
+
 	public static function noticesPrepare(array &$noticeList, array &$noticeTokens, XenForo_Template_Abstract $template, array $containerData)
 	{
 		$bbCodeMode = false;

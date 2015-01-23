@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="sedo_pck" title="CK Editor in XenForo Back office" version_string="1.4.0" version_id="7" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="sedo_pck" title="CK Editor in XenForo Back office" version_string="1.4.1" version_id="8" url="http://xenforo.com/community/resources/1611/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -263,6 +263,16 @@ dl.ckeditor dd{
       <find><![CDATA[#class="textCtrl MessageEditor[^"]*(?<!{\$editorOptions\.extraClass})(?=")#i]]></find>
       <replace><![CDATA[$0 {$editorOptions.extraClass}]]></replace>
     </modification>
+    <modification template="user_upgrade_edit" modification_key="sedo_pck_upgrade_edit" description="CKEditor for XenForo Upgrades (edit)" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<xen:textboxunit[^>]+label="([^">]+)"[^>]+hint="([^">]+)"[^>]+name="description"[^>].*?/>#is]]></find>
+      <replace><![CDATA[<xen:include template="sedo_pck_configuration">
+		<xen:set var="$sedoCkName">description</xen:set>
+		<xen:set var="$sedoCkValue">{$upgrade.description}</xen:set>
+		<xen:set var="$sedoCkNotFull">1</xen:set>
+		<xen:set var="$sedoCkLabel">$1</xen:set>
+		<xen:set var="$sedoCkHint">$2</xen:set>
+	</xen:include>]]></replace>
+    </modification>
   </admin_template_modifications>
   <code_events/>
   <code_event_listeners>
@@ -270,6 +280,7 @@ dl.ckeditor dd{
     <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewAdminNotice" active="1" hint="XenForo_ViewAdmin_Notice_Edit" description="Load html editor in notice"/>
     <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewAdminHelpPageEdit" active="1" hint="XenForo_ViewAdmin_HelpPage_Edit" description="Redactor for XenForo Help pages"/>
     <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewPublicHelpPage" active="1" hint="XenForo_ViewPublic_Help_Page" description="Allow Bb Codes in Help pages"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewPublicAccountUpgrades" active="1" hint="XenForo_ViewPublic_Account_Upgrades" description="Extend ViewPublic Account Upgrades"/>
     <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewPublicPageView" active="1" hint="XenForo_ViewPublic_Page_View" description="Extend View"/>
     <listener event_id="load_class_view" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="extendViewAdminPageEdit" active="1" hint="XenForo_ViewAdmin_Page_Edit" description="Extend ViewAdmin Page Edit"/>
     <listener event_id="notices_prepare" execute_order="10" callback_class="Sedo_Pck_Listener" callback_method="noticesPrepare" active="1" hint="" description="Allow Bb Codes in notice"/>
@@ -302,6 +313,12 @@ dl.ckeditor dd{
       <edit_format_params></edit_format_params>
       <sub_options></sub_options>
       <relation group_id="sedo_pck" display_order="100"/>
+    </option>
+    <option option_id="sedo_pck_parse_bbcode_account_upgrades" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="sedo_pck" display_order="150"/>
     </option>
     <option option_id="sedo_pck_parse_bbcode_help_page" edit_format="onoff" data_type="boolean" can_backup="1">
       <default_value>0</default_value>
@@ -337,6 +354,8 @@ If you need to modify this base css, just edit the template "pke_base.css"]]></p
     <phrase title="option_sedo_pck_notices_create_view" version_id="4" version_string="1.3.0"><![CDATA[Bb Codes Template support for Notices]]></phrase>
     <phrase title="option_sedo_pck_notices_create_view_explain" version_id="4" version_string="1.3.0"><![CDATA[To support Bb Codes with templates, the formatter needs to have the current "view" of the page. Notices can't directly access the view object. Enable this option will generate a view. Use this option only if you need to.]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode" version_id="0" version_string="1.0"><![CDATA[Parse Bb Codes in pages ?]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode_account_upgrades" version_id="8" version_string="1.4.1"><![CDATA[Parse Bb Codes in user account upgrades?]]></phrase>
+    <phrase title="option_sedo_pck_parse_bbcode_account_upgrades_explain" version_id="8" version_string="1.4.1"><![CDATA[]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode_explain" version_id="0" version_string="1.0"><![CDATA[]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode_help_page" version_id="3" version_string="1.2.1"><![CDATA[Parse Bb Codes in help pages?]]></phrase>
     <phrase title="option_sedo_pck_parse_bbcode_help_page_explain" version_id="3" version_string="1.2.1"><![CDATA[]]></phrase>
