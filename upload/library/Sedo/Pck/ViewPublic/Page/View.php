@@ -4,7 +4,7 @@ class Sedo_Pck_ViewPublic_Page_View extends XFCP_Sedo_Pck_ViewPublic_Page_View
 	public function renderHtml()
 	{
 		parent::renderHtml();
-		$content = $this->_params['templateHtml']->render();
+		$content = $this->_params['templateHtml'];
 		$bbCodeMode = false;
 
 		if(XenForo_Application::get('options')->get('sedo_pck_parse_bbcode'))
